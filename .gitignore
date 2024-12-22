@@ -33,7 +33,7 @@ Thumbs.db
 Desktop.ini
 
 # Exclude auto-generated meta files
-*.meta
+# *.meta
 
 # Exclude crash reports
 *.crash
