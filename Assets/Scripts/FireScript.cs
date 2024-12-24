@@ -4,21 +4,24 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class FirePitController : MonoBehaviour
 {
     private ParticleSystem fireParticleSystem;
+    public static bool isFireOn = false;
 
     private void Awake()
     {
-            // Перебираем всех детей firepit
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                Transform child = transform.GetChild(i);
-                child.gameObject.SetActive(false); // Отключаем объект
-            }
+        isFireOn = false;
+        // Перебираем всех детей firepit
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            child.gameObject.SetActive(false); // Отключаем объект
+        }
 
-            Debug.Log("Все дочерние объекты firepit отключены.");
+        Debug.Log("Все дочерние объекты firepit отключены.");
     }
 
     private void Start()
     {
+        isFireOn = false;
         // Перебираем всех детей firepit
         for (int i = 0; i < transform.childCount; i++)
         {
@@ -31,11 +34,19 @@ public class FirePitController : MonoBehaviour
 
     public void Ignite()
     {
+        isFireOn = !isFireOn;
         // Перебираем всех детей firepit
         for (int i = 0; i < transform.childCount; i++)
         {
             Transform child = transform.GetChild(i);
-            child.gameObject.SetActive(true); // включаем
+            if (isFireOn == true)
+            {
+                child.gameObject.SetActive(true); // включаем
+            }
+            else
+            {
+                child.gameObject.SetActive(false);
+            }
         }
 
         Debug.Log("Все дочерние объекты firepit отключены.");
@@ -43,6 +54,7 @@ public class FirePitController : MonoBehaviour
 
     public void Extinguish()
     {
+        isFireOn = false;
         // Выключаем партикл систему
         if (fireParticleSystem != null && fireParticleSystem.isPlaying)
         {
