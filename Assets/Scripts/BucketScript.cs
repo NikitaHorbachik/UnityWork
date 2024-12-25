@@ -1,38 +1,91 @@
 using UnityEngine;
 
-public class BucketScript: MonoBehaviour
+public class BucketScript : MonoBehaviour
 {
-    [SerializeField] private GameObject fullBucketPrefab; // Ссылка на префаб FullBucket
+    public GameObject emptyBucketPrefab;  // Префаб пустого ведра
+    public GameObject fullBucketPrefab;   // Префаб полного ведра
+    public bool isFull = false;           // Состояние ведра: полное или пустое
+    private bool isProcessing = false;    // Флаг для предотвращения многократного срабатывания
 
-    public void Start()
-    {
-        ReplaceBucket();
-    }
+    private static int interactionCount = 0; // Счетчик взаимодействий с аппаратом
+    public GameObject glassObject;           // Объект стакана
+    public GameObject filledGlassPrefab;     // Префаб заполненного стакана
+
     private void OnTriggerEnter(Collider other)
     {
-        // Проверяем, есть ли у другого объекта тег "barrel"
-        if (other.CompareTag("barrel"))
+        if (isProcessing) return;
+
+        if (other.CompareTag("barrel") && !isFull)
         {
-            ReplaceBucket();
+            Debug.Log("Ведро наполняется...");
+            ReplaceBucket(fullBucketPrefab, true);
+        }
+        else if (other.CompareTag("machine") && isFull)
+        {
+            if (FirePitController.isFireOn == true)
+            {
+                Debug.Log("Ведро опустошается...");
+                ReplaceBucket(emptyBucketPrefab, false);
+
+                // Увеличиваем счетчик взаимодействий
+                interactionCount++;
+                Debug.Log($"Взаимодействий с аппаратом: {interactionCount}");
+
+                CheckGlassState(); // Проверяем состояние стакана
+            }
         }
     }
 
-    private void ReplaceBucket()
+    private void ReplaceBucket(GameObject newBucketPrefab, bool newState)
     {
-        if (fullBucketPrefab != null)
+        isProcessing = true;
+
+        if (newBucketPrefab != null)
         {
-            // Сохраняем текущую позицию и поворот
             Vector3 currentPosition = transform.position;
             Quaternion currentRotation = transform.rotation;
 
-            // Создаём новый FullBucket
-            Instantiate(fullBucketPrefab, currentPosition, currentRotation);
-            // Удаляем текущий EmptyBucket
+            GameObject newBucket = Instantiate(newBucketPrefab, currentPosition, currentRotation);
+
+            BucketScript newBucketScript = newBucket.GetComponent<BucketScript>();
+            if (newBucketScript != null)
+            {
+                newBucketScript.isFull = newState;
+            }
+
             Destroy(gameObject);
         }
         else
         {
-            Debug.LogError("FullBucketPrefab не назначен!");
+            Debug.LogError("Prefab ведра не назначен!");
+        }
+
+        isProcessing = false;
+    }
+
+    private void CheckGlassState()
+    {
+        // Проверяем, выполнены ли условия
+        if (interactionCount >= 2 && FirePitController.isFireOn == true && GlassScript.isGlassPlaced == true)
+        {
+            Debug.Log("Меняем стакан на заполненный!");
+
+            if (glassObject != null && filledGlassPrefab != null)
+            {
+                // Сохраняем позицию и поворот стакана
+                Vector3 glassPosition = glassObject.transform.position;
+                Quaternion glassRotation = glassObject.transform.rotation;
+
+                // Создаём заполненный стакан
+                Instantiate(filledGlassPrefab, glassPosition, glassRotation);
+
+                // Удаляем старый стакан
+                Destroy(glassObject);
+            }
+            else
+            {
+                Debug.LogError("Объект стакана или префаб заполненного стакана не назначен!");
+            }
         }
     }
 }

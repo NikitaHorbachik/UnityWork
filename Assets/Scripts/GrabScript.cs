@@ -36,5 +36,6 @@ public class GrabbableMessage : MonoBehaviour
     private void OnRelease(SelectExitEventArgs args)
     {
         Debug.Log("Объект отпущен."); // Вывод информации об отпускании объекта
+
     }
 }
