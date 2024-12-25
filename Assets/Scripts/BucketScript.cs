@@ -51,6 +51,8 @@ public class BucketScript : MonoBehaviour
             if (newBucketScript != null)
             {
                 newBucketScript.isFull = newState;
+                newBucketScript.glassObject = glassObject;
+                newBucketScript.filledGlassPrefab = filledGlassPrefab;
             }
 
             Destroy(gameObject);
@@ -75,12 +77,13 @@ public class BucketScript : MonoBehaviour
                 // Сохраняем позицию и поворот стакана
                 Vector3 glassPosition = glassObject.transform.position;
                 Quaternion glassRotation = glassObject.transform.rotation;
+                glassRotation.x = 0;
 
                 // Создаём заполненный стакан
                 Instantiate(filledGlassPrefab, glassPosition, glassRotation);
 
                 // Удаляем старый стакан
-                Destroy(glassObject);
+                glassObject.SetActive(false);
             }
             else
             {
